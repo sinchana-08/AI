@@ -1,0 +1,55 @@
+board = [[' ' for _ in range(3)] for _ in range(3)]
+def draw_board():
+    for row in board:
+        print(' | '.join(row))
+        print('---------')
+def player_move(icon):
+    if icon == 'X':
+        number = 1
+    elif icon == 'O':
+        number = 2
+
+    print("Your turn player {}".format(number))
+
+    row = int(input("Enter row (0-2): "))
+    col = int(input("Enter column (0-2): "))
+
+    if board[row][col] == ' ':
+        board[row][col] = icon
+    else:
+        print("That space is taken!")
+def is_victory(icon):
+    for row in board:
+        if all(cell == icon for cell in row):
+            return True
+    for col in range(3):
+        if all(board[row][col] == icon for row in range(3)):
+            return True
+    if all(board[i][i] == icon for i in range(3)) or \
+       all(board[i][2-i] == icon for i in range(3)):
+        return True
+
+    return False
+def is_draw():
+    return all(cell != ' ' for row in board for cell in row)
+def play_game():
+    draw_board()
+    while True:
+        player_move('X')
+        draw_board()
+        if is_victory('X'):
+            print("Player 1 wins! Congratulations!")
+            break
+        elif is_draw():
+            print("It's a draw!")
+            break
+        player_move('O')
+        draw_board()
+        if is_victory('O'):
+            print("Player 2 wins! Congratulations!")
+            break
+        elif is_draw():
+            print("It's a draw!")
+            break
+
+play_game()
