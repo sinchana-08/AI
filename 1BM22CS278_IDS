@@ -1,0 +1,95 @@
+from copy import deepcopy
+
+DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+class PuzzleState:
+    def __init__(self, board, parent=None, move=""):
+        self.board = board
+        self.parent = parent
+        self.move = move
+
+    def get_blank_position(self):
+        for i in range(3):
+            for j in range(3):
+                if self.board[i][j] == 0:
+                    return i, j
+
+    def generate_successors(self):
+        successors = []
+        x, y = self.get_blank_position()
+
+        for dx, dy in DIRECTIONS:
+            new_x, new_y = x + dx, y + dy
+
+            if 0 <= new_x < 3 and 0 <= new_y < 3:
+ 
+                new_board = deepcopy(self.board)
+                new_board[x][y], new_board[new_x][new_y] = new_board[new_x][new_y], new_board[x][y]
+                successors.append(PuzzleState(new_board, parent=self))
+
+        return successors
+
+    def is_goal(self, goal_state):
+        return self.board == goal_state
+
+    def __str__(self):
+        return "\n".join([" ".join(map(str, row)) for row in self.board])
+
+def depth_limited_search(current_state, goal_state, depth):
+    if depth == 0 and current_state.is_goal(goal_state):
+        return current_state
+
+    if depth > 0:
+        for successor in current_state.generate_successors():
+            found = depth_limited_search(successor, goal_state, depth - 1)
+            if found:
+                return found
+    return None
+
+def iterative_deepening_search(start_state, goal_state):
+    depth = 0
+    while True:
+        print(f"\nSearching at depth level: {depth}")
+        result = depth_limited_search(start_state, goal_state, depth)
+        if result:
+            return result
+        depth += 1
+
+def get_user_input():
+    print("Enter the start state (use 0 for the blank):")
+    start_state = []
+    for _ in range(3):
+        row = list(map(int, input().split()))
+        start_state.append(row)
+
+    print("Enter the goal state (use 0 for the blank):")
+    goal_state = []
+    for _ in range(3):
+        row = list(map(int, input().split()))
+        goal_state.append(row)
+
+    return start_state, goal_state
+
+def main():
+
+    start_board, goal_board = get_user_input()
+
+    start_state = PuzzleState(start_board)
+    goal_state = goal_board
+
+    result = iterative_deepening_search(start_state, goal_state)
+
+    if result:
+        print("\nGoal reached!")
+        path = []
+        while result:
+            path.append(result)
+            result = result.parent
+        path.reverse()
+        for state in path:
+            print(state, "\n")
+    else:
+        print("Goal state not found.")
+
+if __name__ == "__main__":
+    main()
